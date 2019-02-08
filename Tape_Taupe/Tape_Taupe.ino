@@ -14,16 +14,11 @@ unsigned long timeStart;
 unsigned long previousMillis = 0;
 long interval = 1200; 
 long intervalOn = 1000; 
-int ledState1 = LOW;  
-int ledState2 = LOW;  
-int ledState3 = LOW; 
 
-int light1On = 0;
-int light2On = 0;
-int light3On = 0;
 int fini = 0;
-srand(time(NULL));
 
+long randValue;
+long lastRand;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -49,109 +44,55 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
   
-  int sensorValue1 = analogRead(A0);
-  int sensorValue2 = analogRead(A1);
-  int sensorValue3 = analogRead(A2);
-  int ledStates[] = {ledState1, ledState2, ledState3};
-  int sensors[] = {sensorValue1, sensorValue2, sensorValue3};
-  int ledOns[] = {light1On, light2On, light3On};
-  int randValue = rand() % 3 + 1;
-  //Serial.println(sensorValue1);
-  //Serial.println(sensorValue2);
+  int ledStates[] = {LOW, LOW, LOW};
+  int sensors[] = {analogRead(A0), analogRead(A1), analogRead(A3)};
+  int ledOns[] = {0, 0, 0};
 
+  //Serial.println(sensors[0]);
+  //Serial.println(sensors[1]);
+  //Serial.println(sensors[2]);
+  
   lcd.setCursor(0, 1);
   unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
     // save the last time you blinked the LED
+    
+    randValue = random(3);
+    Serial.println(randValue);
     previousMillis = currentMillis;
 
-    ledStates[randValue] = HIGH;
-    ledOns[randValue] = 1;
-    
-    
-
-    /* if the LED is off turn it on and vice-versa:
-    if (ledState1 == LOW) {
-      ledState1 = HIGH;
-      ledState2 = LOW;
-      ledState3 = LOW;
+    if (ledStates[randValue] == LOW) {
+      ledStates[randValue] = HIGH;
       interval = intervalOn;
-      light1On = 1;
-      light2On = 0;
-      light3On = 0;
-    } else if (ledState2 == LOW) {
-        ledState1 = LOW;
-        ledState2 = HIGH;
-        ledState3 = LOW;
-        interval = intervalOn;
-        light1On = 0;
-        light2On = 1;
-        light3On = 0;
-    } else if (ledState3 == LOW) {
-        ledState1 = LOW;
-        ledState2 = LOW;
-        ledState3 = HIGH;
-        interval = intervalOn;
-        light1On = 0;
-        light2On = 0;
-        light3On = 1;
-    }  else {
-        ledState1 = LOW;
-        ledState2 = LOW;
-        ledState3 = LOW;
-        interval = 1000;
-        light1On = 0;
-        light2On = 0;
-        light3On = 0;
+      ledOns[randValue] = 1;
+    } else {
+      ledStates[0] = LOW;
+      ledStates[1] = LOW;
+      ledStates[2] = LOW;
+      interval = 1000;
+      ledOns[0] = 0;
+      ledOns[1] = 0;
+      ledOns[2] = 0;
     }
-    */
 
-    ledStates[randValue] = LOW;
+    // set the LED with the ledState of the variable:        
+    digitalWrite(4, ledStates[0]);
+    digitalWrite(2, ledStates[1]);
+    digitalWrite(7, ledStates[2]);
+  }
+  
+  
+  if (sensors[randValue] > 200 && ledOns[randValue] == 1) {
+    Serial.println("Tap");
+    lcd.print(cpt+=1);
     ledOns[randValue] = 0;
+    if (interval > 100) {
+      intervalOn -= 100;
+    }
+  }
     
-
-    // set the LED with the ledState of the variable:
-    digitalWrite(4, ledState1);
-    digitalWrite(2, ledState2);
-    digitalWrite(7, ledState3);
-  }
-
-if (ledStates[randValue] >200 && ledOns[randValue] == 1) {
-    lcd.print(cpt+=1);
-    ledOns[randValue] = 0;
-    if (interval > 100) {
-      intervalOn -= 100;
-    }
-  }
-  
-/*
-  if (sensorValue1 > 200 && light1On == 1) {
-    lcd.print(cpt+=1);
-    light1On = 0;
-    if (interval > 100) {
-      intervalOn -= 100;
-    }
-  }
-  
-  if (sensorValue2 > 200 && light2On == 1) {
-    lcd.print(cpt+=1);
-    light2On = 0;
-    if (interval > 100) {
-      intervalOn -= 100;
-    }
-  }
-  
-  if (sensorValue3 > 200 && light3On == 1) {
-    lcd.print(cpt+=1);
-    light2On = 0;
-    if (interval > 100) {
-      intervalOn -= 100;
-    }
-  }
-  */
-  
-  if (currentMillis > 30000) { 
+  if (currentMillis > 300000) { 
     if (cpt == 0) {
       lcd.print("Perdu !");
     } else { 
@@ -165,9 +106,9 @@ if (ledStates[randValue] >200 && ledOns[randValue] == 1) {
       delay(400);
       lcd.scrollDisplayLeft();
     }
-    ledState1 = HIGH;
-    ledState2 = HIGH;
-    ledState3 = HIGH;
+    ledStates[0] = HIGH;
+    ledStates[1] = HIGH;
+    ledStates[2] = HIGH;
   }
   
   //else if (sensorValue > 200 && penalityOn == 0 && cpt > 0 && fini < 9) {
