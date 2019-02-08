@@ -17,8 +17,8 @@ long intervalOn = 1000;
 
 int fini = 0;
 
-long randValue;
-long lastRand;
+long randValue = 0;
+long lastRand = 0;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -48,18 +48,19 @@ void loop() {
   int sensors[] = {analogRead(A0), analogRead(A1), analogRead(A3)};
   int ledOns[] = {0, 0, 0};
 
-  //Serial.println(sensors[0]);
-  //Serial.println(sensors[1]);
-  //Serial.println(sensors[2]);
-  
   lcd.setCursor(0, 1);
   unsigned long currentMillis = millis();
 
   if (currentMillis - previousMillis >= interval) {
     // save the last time you blinked the LED
+    lastRand = random(3);
+
+    while (lastRand == randValue) {
+      lastRand = random(3);
+    }
+
+    randValue = lastRand;
     
-    randValue = random(3);
-    Serial.println(randValue);
     previousMillis = currentMillis;
 
     if (ledStates[randValue] == LOW) {
@@ -67,10 +68,10 @@ void loop() {
       interval = intervalOn;
       ledOns[randValue] = 1;
     } else {
+      interval = 1000;
       ledStates[0] = LOW;
       ledStates[1] = LOW;
       ledStates[2] = LOW;
-      interval = 1000;
       ledOns[0] = 0;
       ledOns[1] = 0;
       ledOns[2] = 0;
@@ -83,7 +84,7 @@ void loop() {
   }
   
   
-  if (sensors[randValue] > 200 && ledOns[randValue] == 1) {
+  if (sensors[randValue] > 300 && ledOns[randValue] == 1) {
     Serial.println("Tap");
     lcd.print(cpt+=1);
     ledOns[randValue] = 0;
@@ -92,7 +93,7 @@ void loop() {
     }
   }
     
-  if (currentMillis > 300000) { 
+  if (currentMillis > 30000) { 
     if (cpt == 0) {
       lcd.print("Perdu !");
     } else { 
@@ -110,10 +111,4 @@ void loop() {
     ledStates[1] = HIGH;
     ledStates[2] = HIGH;
   }
-  
-  //else if (sensorValue > 200 && penalityOn == 0 && cpt > 0 && fini < 9) {
-    //  lcd.print(cpt-=1);
-    //  penalityOn = 1;
-    //  fini += 1;
-  //}
 }
