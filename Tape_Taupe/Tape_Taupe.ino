@@ -1,6 +1,7 @@
 
 #include <Wire.h>
 #include "rgb_lcd.h"
+#include <stdlib.h>
   
 rgb_lcd lcd;
 
@@ -21,6 +22,7 @@ int light1On = 0;
 int light2On = 0;
 int light3On = 0;
 int fini = 0;
+srand(time(NULL));
 
 
 // the setup routine runs once when you press reset:
@@ -46,9 +48,14 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+  
   int sensorValue1 = analogRead(A0);
   int sensorValue2 = analogRead(A1);
   int sensorValue3 = analogRead(A2);
+  int ledStates[] = {ledState1, ledState2, ledState3};
+  int sensors[] = {sensorValue1, sensorValue2, sensorValue3};
+  int ledOns[] = {light1On, light2On, light3On};
+  int randValue = rand() % 3 + 1;
   //Serial.println(sensorValue1);
   //Serial.println(sensorValue2);
 
@@ -59,7 +66,12 @@ void loop() {
     // save the last time you blinked the LED
     previousMillis = currentMillis;
 
-    // if the LED is off turn it on and vice-versa:
+    ledStates[randValue] = HIGH;
+    ledOns[randValue] = 1;
+    
+    
+
+    /* if the LED is off turn it on and vice-versa:
     if (ledState1 == LOW) {
       ledState1 = HIGH;
       ledState2 = LOW;
@@ -93,6 +105,11 @@ void loop() {
         light2On = 0;
         light3On = 0;
     }
+    */
+
+    ledStates[randValue] = LOW;
+    ledOns[randValue] = 0;
+    
 
     // set the LED with the ledState of the variable:
     digitalWrite(4, ledState1);
@@ -100,6 +117,15 @@ void loop() {
     digitalWrite(7, ledState3);
   }
 
+if (ledStates[randValue] >200 && ledOns[randValue] == 1) {
+    lcd.print(cpt+=1);
+    ledOns[randValue] = 0;
+    if (interval > 100) {
+      intervalOn -= 100;
+    }
+  }
+  
+/*
   if (sensorValue1 > 200 && light1On == 1) {
     lcd.print(cpt+=1);
     light1On = 0;
@@ -123,6 +149,7 @@ void loop() {
       intervalOn -= 100;
     }
   }
+  */
   
   if (currentMillis > 30000) { 
     if (cpt == 0) {
