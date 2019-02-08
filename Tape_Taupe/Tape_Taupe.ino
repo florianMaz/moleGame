@@ -1,6 +1,5 @@
-
+#include <rgb_lcd.h>
 #include <Wire.h>
-#include "rgb_lcd.h"
 #include <stdlib.h>
   
 rgb_lcd lcd;
@@ -15,7 +14,9 @@ unsigned long previousMillis = 0;
 long interval = 1200; 
 long intervalOn = 1000; 
 
-int fini = 0;
+int ledOns[3];
+
+int ended = 0;
 
 long randValue = 0;
 long lastRand = 0;
@@ -37,63 +38,73 @@ void setup() {
   lcd.print("Score : ");
   lcd.setCursor(0, 1); 
   lcd.print(cpt); 
+  
+  ledOns[0] = 0;
+  ledOns[1] = 0;
+  ledOns[2] = 0;
 
   delay(1000);
 }
 
 // the loop routine runs over and over again forever:
 void loop() {
+
+  int ledStates[] = {LOW, LOW, LOW}; // Init is great !!!!!!
+  int sensors[] = {analogRead(A0), analogRead(A1), analogRead(A3)}; // Init is great !!!!!!
   
-  int ledStates[] = {LOW, LOW, LOW};
-  int sensors[] = {analogRead(A0), analogRead(A1), analogRead(A3)};
-  int ledOns[] = {0, 0, 0};
 
   lcd.setCursor(0, 1);
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis >= interval) {
-    // save the last time you blinked the LED
-    lastRand = random(3);
-
-    while (lastRand == randValue) {
+  unsigned long currentMillis = millis(); //  Get actual tilme
+    if (currentMillis < 30000) { 
+    if (currentMillis - previousMillis >= interval) { // Check if interval is complete
+      // save the last time you blinked the LED
       lastRand = random(3);
-    }
-
-    randValue = lastRand;
-    
-    previousMillis = currentMillis;
-
-    if (ledStates[randValue] == LOW) {
-      ledStates[randValue] = HIGH;
-      interval = intervalOn;
-      ledOns[randValue] = 1;
-    } else {
-      interval = 1000;
-      ledStates[0] = LOW;
-      ledStates[1] = LOW;
-      ledStates[2] = LOW;
-      ledOns[0] = 0;
-      ledOns[1] = 0;
-      ledOns[2] = 0;
-    }
-
-    // set the LED with the ledState of the variable:        
-    digitalWrite(4, ledStates[0]);
-    digitalWrite(2, ledStates[1]);
-    digitalWrite(7, ledStates[2]);
-  }
   
+      while (lastRand == randValue) {
+        lastRand = random(3);
+      }
   
-  if (sensors[randValue] > 300 && ledOns[randValue] == 1) {
-    Serial.println("Tap");
-    lcd.print(cpt+=1);
-    ledOns[randValue] = 0;
-    if (interval > 100) {
-      intervalOn -= 100;
+      randValue = lastRand; // Get new random
+      
+      previousMillis = currentMillis;
+  
+      if (ledStates[randValue] == LOW) { 
+        ledStates[randValue] = HIGH; 
+        interval = intervalOn;
+        ledOns[randValue] = 1;
+      } else {
+        interval = 1000;
+        ledStates[0] = LOW;
+        ledStates[1] = LOW;
+        ledStates[2] = LOW;
+        ledOns[0] = 0;
+        ledOns[1] = 0;
+        ledOns[2] = 0;
+      }
+  
+      // set the LED with the ledState of the variable:        
+      digitalWrite(4, ledStates[0]);
+      digitalWrite(2, ledStates[1]);
+      digitalWrite(7, ledStates[2]);
+  
+      Serial.println("la ledStates value");
+      Serial.println(ledStates[randValue]);
+    }
+    if(sensors[randValue] > 300){
+      Serial.println("la ledStates value with sensor");
+      Serial.println(ledStates[randValue]);
+    }
+    
+    if (sensors[randValue] > 300 && ledOns[randValue] == 1) {
+      Serial.println("Tap");
+      lcd.print(cpt+=1);
+      ledOns[randValue] = 0;
+      if (interval > 100) {
+        intervalOn -= 100;
+      }
     }
   }
-    
-  if (currentMillis > 30000) { 
+  else if (currentMillis > 30000) { 
     if (cpt == 0) {
       lcd.print("Perdu !");
     } else { 
@@ -110,5 +121,9 @@ void loop() {
     ledStates[0] = HIGH;
     ledStates[1] = HIGH;
     ledStates[2] = HIGH;
+
+    digitalWrite(4, ledStates[0]);
+    digitalWrite(2, ledStates[1]);
+    digitalWrite(7, ledStates[2]);
   }
 }
